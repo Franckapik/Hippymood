@@ -54,6 +54,11 @@ exports.Admin = function(req, res){
 
 // Function to get song infos by submitting a genre
 exports.Genre = function(req, res){
+    // Disabling cache for myurl.com/genre/id URLs to prevent some browser to play the same song again and again and again...
+    res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.header("Pragma", "no-cache");
+    res.header("Expires", 0);
+
     var genre = req.params.id;
 
     var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album ';
@@ -79,7 +84,22 @@ exports.Genre = function(req, res){
         if (err) throw err;
 
         if (rows.length > 0) {
-            var randomSong = rows[Math.floor(Math.random() * rows.length)];
+            var randomIndex1 = Math.floor(Math.random() * rows.length);
+
+            var randomSongs = [];
+            randomSongs.push(rows[randomIndex1]);
+
+            // Selecting next song as well if possible
+            if (rows.length > 1) {
+                var randomIndex2 = randomIndex1;
+                do {
+                    randomIndex2 = Math.floor(Math.random() * rows.length);
+                } while (randomIndex1 == randomIndex2);
+                randomSongs.push(rows[randomIndex2]);
+            }
+
+            // -1 to count the one being played
+            var infos = {nbSongLeft: rows.length - 1};
 
             var randomIndex1 = Math.floor(Math.random() * rows.length);
 
@@ -100,9 +120,14 @@ exports.Genre = function(req, res){
 
             // Saving song played id
             if (req.session.playedSongs == undefined) 
-                req.session.playedSongs = [randomSong['id']];
+                req.session.playedSongs = [randomSongs[0]['id']];
             else 
-                req.session.playedSongs.push(randomSong['id']);
+                req.session.playedSongs.push(randomSongs[0]['id']);
+
+            var response = {
+                songs: randomSongs,
+                infos: infos
+            };
 
             var response = {
                 songs: randomSongs,
@@ -114,6 +139,41 @@ exports.Genre = function(req, res){
         else {
             var error = {"allSongGenrePlayed": 1};
             res.send({error});
+        }
+    });
+};
+
+// Function to get song infos by submitting a genre
+exports.Search = function(req, res){
+    var keywords = req.params.keywords;
+    var keywordsUC = keywords.toUpperCase();
+
+    var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album, genres.name AS genre ';
+        SQLquery += 'FROM songs, genreAssociation, genres, artists, albums ';
+        SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
+        SQLquery += 'AND genres.id = genreAssociation.id ';
+        SQLquery += 'AND songs.id_artists = artists.id ';
+        SQLquery += 'AND songs.id_albums = albums.id ';
+        SQLquery += 'AND ( ';
+        SQLquery += 'UCASE(songs.name) LIKE "%' + keywordsUC + '%" ';
+        SQLquery += 'OR UCASE(artists.name) LIKE "%' + keywordsUC + '%" ';
+        SQLquery += 'OR UCASE(albums.name) LIKE "%' + keywordsUC + '%" ';
+        SQLquery += ') ';
+
+    connection.query(SQLquery, function(err, rows, fields) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log(rows);
+            var data = {err: ''};
+            if (rows.length === 0) {
+                data.err = "No result found for : " + keywords;
+            }
+            else {
+                data.searchResults = rows;
+            }
+            res.send(data);
         }
     });
 };

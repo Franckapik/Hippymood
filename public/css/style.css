@@ -108,7 +108,7 @@ hide {
     }
     /* Wide card with share menu button */
     /* Player */
-    .demo-card-wide.mdl-card, .genreList {
+    .demo-card-wide.mdl-card, .genreList, .searchList {
         width: 512px;
         margin: 0 auto; 
     }
@@ -316,4 +316,11 @@ img.bigger {
 
 #playerGenre span.mdl-badge {
     margin-right: 0px;
+}
+/* Search */
+#menu form {
+    display: inline-block;
+}
+#menu #searchIcon {
+    font-size: 1rem;
 }

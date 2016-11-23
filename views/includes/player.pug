@@ -35,6 +35,13 @@ div#player.demo-card-wide.mdl-card.mdl-shadow--2dp
                 button#cancelGenre.mdl-chip__action(type="button")
                     i.material-icons cancel
     div#menu.mdl-card__menu
+        form#searchForm(action="/Search")
+            div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable
+              label.mdl-button.mdl-js-button.mdl-button--icon(for="searchInput")
+                  i#searchIcon.material-icons search
+              div.mdl-textfield__expandable-holder
+                  input#searchInput.mdl-textfield__input(type="text")
+                  label.mdl-textfield__label(for="sample-expandable") Expandable Input
         button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
             i.material-icons more_vert
         ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")

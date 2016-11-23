@@ -36,7 +36,8 @@ function playerVueInit() {
             genre: '',
             nextGenre: '',
             allSongGenrePlayed: 0,
-            nbSongLeft: 999
+            nbSongLeft: 999,
+            searchResults: []
         },
         methods: {
             play: function(data, infos) {
@@ -44,7 +45,7 @@ function playerVueInit() {
                 this.artist = data.artist
                 this.album = data.album
                 this.path = data.path
-                this.genre = "Genre : " + currentGenre.getAttribute("data-genre-name")
+                this.genre = "Mood : " + currentGenre.getAttribute("data-genre-name")
                 this.filename = filenameFromPath(data.path)
                 if (nextGenre != '')
                     this.nextGenre = "Prochain : " + nextGenre
@@ -59,15 +60,43 @@ function playerVueInit() {
                 this.allSongGenrePlayed = allSongGenrePlayed;
                 this.nbSongLeft = currentGenre.getAttribute("data-genre-nbsongleft")
             },
+            search: function(data) {
+                this.searchResults = data.searchResults;
+            },
+            playSearchResult: function(index) {
+                // Getting data of the choosen song
+                data = this.searchResults[index];
+
+                // Playing song
+                playerHTML5.setAttribute("src", data.path);
+
+                // Updating vue data
+                this.title = data.song
+                this.artist = data.artist
+                this.album = data.album
+                this.path = data.path
+                this.genre = "Mood : " + data.genre
+                this.filename = filenameFromPath(data.path)
+
+                // Switching to the player tab
+                var playerButton = document.querySelectorAll('.mdl-tabs__tab[href="#player-panel"]')[0];
+                var playerPanel = document.getElementById("player-panel");
+                var searchButton = document.querySelectorAll('.mdl-tabs__tab[href="#search-panel"]')[0];
+                var searchPanel = document.getElementById("search-panel");
+                removeClass(searchButton, "is-active");
+                removeClass(searchPanel, "is-active");
+                addClass(playerPanel, "is-active");
+                addClass(playerButton, "is-active");
+            },
             updateUi: function() {
                 this.title = currentSong.song
                 this.artist = currentSong.artist
                 this.album = currentSong.album
                 this.path = currentSong.path
                 if (lastGenre)
-                    this.genre = "Genre : " + lastGenre.getAttribute("data-genre-name")
+                    this.genre = "Mood : " + lastGenre.getAttribute("data-genre-name")
                 if (nextGenre != '')
-                    this.nextGenre = "Prochain : " + nextGenre
+                    this.nextGenre = "Prochaine : " + nextGenre
                 else 
                     this.nextGenre = ''
                 this.filename = filenameFromPath(currentSong.path);
@@ -178,7 +207,6 @@ function playGenre() {
     }
 };
 function cancelNextGenre() {
-    console.log("Coucou");
     currentGenre = lastGenre;
     playerVue.updateUi();
 }
@@ -337,4 +365,49 @@ function scanMusic() {
         removeClass(scanMusicSpinner,"showOpacity");
         addClass(scanMusicSpinner,"hideOpacity");
     });
+}
+
+/* Search */
+function search(e) {
+    if (e.preventDefault) e.preventDefault();
+
+    // Switching to the search tab
+    var playerButton = document.querySelectorAll('.mdl-tabs__tab[href="#player-panel"]')[0];
+    var playerPanel = document.getElementById("player-panel");
+    var searchButton = document.querySelectorAll('.mdl-tabs__tab[href="#search-panel"]')[0];
+    var searchPanel = document.getElementById("search-panel");
+    removeClass(playerButton, "is-active");
+    removeClass(playerPanel, "is-active");
+    addClass(searchPanel, "is-active");
+    addClass(searchButton, "is-active");
+
+    // Getting search keywords 
+    var searchInput = document.getElementById('searchInput');
+    keywords = searchInput.value;
+
+    getAjax("/search/" + keywords, function(data){ 
+        searchResults = JSON.parse(data);
+        console.log(searchResults);
+        playerVue.search(searchResults);
+
+        // Adding events to the links
+        var searchResultsLinks = document.querySelectorAll("div.searchResult > a");
+        console.log("Nb réponses : " + searchResultsLinks.length);
+        for (o = 0; o++; o < searchResultsLinks.length) {
+            searchResultsLinks[o].addEventListener("click", playPause, false);
+        }
+    });
+
+    // You must return false to prevent the default form behavior
+    return false;
+}
+function playSearchResult() {
+    console.log("C'est parti mon kiki !");
+}
+
+var searchForm = document.getElementById('searchForm');
+if (searchForm.attachEvent) {
+    searchForm.attachEvent("submit", search);
+} else {
+    searchForm.addEventListener("submit", search);
 }

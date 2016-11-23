@@ -39,6 +39,7 @@ app.set('view engine', 'pug');
 app.use('/music', express.static('music'));
 app.use('/public', express.static('public'));
 
+
 // send app to router
 require('./router')(app);
 

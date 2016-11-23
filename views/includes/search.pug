@@ -1,0 +1,4 @@
+div.mdl-grids.searchList#search
+    div.searchResult(v-for="search in searchResults")
+        a(href="#/", v-on:click="playSearchResult($index)" , data-search-index="{{ search.song }}", data-song="{{ search.song }}", data-artist="{{ search.artist }}", data-album="{{ search.album }}", data-path="{{ search.path }}")
+            p {{ search.song }}
