@@ -1,8 +1,11 @@
+//chargement des modules
+
 var express = require('express');
 var app = express();
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 
+//variables mysql
 var config = require('./config');
 var options = {
     host: config.db.host,
@@ -22,6 +25,8 @@ var options = {
         }
     }
 };
+
+//nouvelle session
 var sessionStore = new MySQLStore(options);
 
 app.use(session({
@@ -44,5 +49,5 @@ app.use('/public', express.static('public'));
 require('./router')(app);
 
 app.listen(app.get('port'), function () {
-      console.log('Example app listening on port ' + app.get('port') + '!');
+      console.log('Get it Spicy Dude !' + app.get('port') + '!');
 });

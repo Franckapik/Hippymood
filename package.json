@@ -1,0 +1,27 @@
+{
+  "name": "hippymood",
+  "version": "1.0.0",
+  "description": "Get it spicy and colorful !",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "express-mysql-session": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Franckapik/Hippymood.git"
+  },
+  "keywords": [
+    "hippymood"
+  ],
+  "author": "Ronanch",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Franckapik/Hippymood/issues"
+  },
+  "homepage": "https://github.com/Franckapik/Hippymood#readme"
+}

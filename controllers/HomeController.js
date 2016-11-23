@@ -17,23 +17,24 @@ function shuffleArray(array) {
 // Loading configuration file with database credentials
 var config = require('./../config');
 var connection = mysql.createConnection({
-    host     : config.db.host,
-    user     : config.db.user,
-    password : config.db.password,
-    database : config.db.database,
+    host: config.db.host,
+    user: config.db.user,
+    password: config.db.password,
+    database: config.db.database,
     multipleStatements: true
 });
 
-exports.Index = function(req, res){
+exports.Index = function(req, res) {
     res.render('index');
 };
-exports.App = function(req, res){
+exports.App = function(req, res) {
     var SQLquery = 'SELECT genres.id, genres.name, COUNT(songs.id) AS nbSongs ';
-        SQLquery += 'FROM songs ';
-        SQLquery += 'JOIN genreAssociation ON songs.id = genreAssociation.id_songs ';
-        SQLquery += 'JOIN genres ON genreAssociation.id = genres.id ';
-        SQLquery += 'GROUP BY genres.id ';
-        SQLquery += 'ORDER BY nbSongs DESC ';
+    
+    SQLquery += 'FROM songs ';
+    SQLquery += 'JOIN genreAssociation ON songs.id = genreAssociation.id_songs ';
+    SQLquery += 'JOIN genres ON genreAssociation.id = genres.id ';
+    SQLquery += 'GROUP BY genres.id ';
+    SQLquery += 'ORDER BY nbSongs DESC ';
 
     connection.query(SQLquery, function(err, rows, fields) {
         if (err)
@@ -44,16 +45,16 @@ exports.App = function(req, res){
                 topGenre.push(rows.shift());
             }
             var randomRows = topGenre.concat(shuffleArray(rows));
-            res.render('app', {genres: randomRows});
+            res.render('app', { genres: randomRows });
         }
     });
 };
-exports.Admin = function(req, res){
+exports.Admin = function(req, res) {
     res.render('admin');
 };
 
 // Function to get song infos by submitting a genre
-exports.Genre = function(req, res){
+exports.Genre = function(req, res) {
     // Disabling cache for myurl.com/genre/id URLs to prevent some browser to play the same song again and again and again...
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
     res.header("Pragma", "no-cache");
@@ -62,17 +63,17 @@ exports.Genre = function(req, res){
     var genre = req.params.id;
 
     var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album ';
-        SQLquery += 'FROM songs, genreAssociation, artists, albums ';
-        SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
-        SQLquery += 'AND genreAssociation.id = "' + req.params.id + '"';
-        SQLquery += 'AND songs.id_artists = artists.id ';
-        SQLquery += 'AND songs.id_albums = albums.id ';
+    SQLquery += 'FROM songs, genreAssociation, artists, albums ';
+    SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
+    SQLquery += 'AND genreAssociation.id = "' + req.params.id + '"';
+    SQLquery += 'AND songs.id_artists = artists.id ';
+    SQLquery += 'AND songs.id_albums = albums.id ';
 
     // Select song from not played songs
     if (req.session.playedSongs && req.session.playedSongs.length != 0 && req.session.playedSongs != []) {
         SQLquery += 'AND songs.id NOT IN (';
         req.session.playedSongs.forEach(function(entry, index) {
-            if (index != req.session.playedSongs.length -1)
+            if (index != req.session.playedSongs.length - 1)
                 SQLquery += '"' + entry + '", ';
             else
                 SQLquery += '"' + entry + '") ';
@@ -99,7 +100,7 @@ exports.Genre = function(req, res){
             }
 
             // -1 to count the one being played
-            var infos = {nbSongLeft: rows.length - 1};
+            var infos = { nbSongLeft: rows.length - 1 };
 
             var randomIndex1 = Math.floor(Math.random() * rows.length);
 
@@ -116,12 +117,12 @@ exports.Genre = function(req, res){
             }
 
             // -1 to count the one being played
-            var infos = {nbSongLeft: rows.length - 1};
+            var infos = { nbSongLeft: rows.length - 1 };
 
             // Saving song played id
-            if (req.session.playedSongs == undefined) 
+            if (req.session.playedSongs == undefined)
                 req.session.playedSongs = [randomSongs[0]['id']];
-            else 
+            else
                 req.session.playedSongs.push(randomSongs[0]['id']);
 
             var response = {
@@ -135,42 +136,39 @@ exports.Genre = function(req, res){
             };
 
             res.send(response);
-        }
-        else {
-            var error = {"allSongGenrePlayed": 1};
-            res.send({error});
+        } else {
+            var error = { "allSongGenrePlayed": 1 };
+            res.send({ error });
         }
     });
 };
 
 // Function to get song infos by submitting a genre
-exports.Search = function(req, res){
+exports.Search = function(req, res) {
     var keywords = req.params.keywords;
     var keywordsUC = keywords.toUpperCase();
 
     var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album, genres.name AS genre ';
-        SQLquery += 'FROM songs, genreAssociation, genres, artists, albums ';
-        SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
-        SQLquery += 'AND genres.id = genreAssociation.id ';
-        SQLquery += 'AND songs.id_artists = artists.id ';
-        SQLquery += 'AND songs.id_albums = albums.id ';
-        SQLquery += 'AND ( ';
-        SQLquery += 'UCASE(songs.name) LIKE "%' + keywordsUC + '%" ';
-        SQLquery += 'OR UCASE(artists.name) LIKE "%' + keywordsUC + '%" ';
-        SQLquery += 'OR UCASE(albums.name) LIKE "%' + keywordsUC + '%" ';
-        SQLquery += ') ';
+    SQLquery += 'FROM songs, genreAssociation, genres, artists, albums ';
+    SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
+    SQLquery += 'AND genres.id = genreAssociation.id ';
+    SQLquery += 'AND songs.id_artists = artists.id ';
+    SQLquery += 'AND songs.id_albums = albums.id ';
+    SQLquery += 'AND ( ';
+    SQLquery += 'UCASE(songs.name) LIKE "%' + keywordsUC + '%" ';
+    SQLquery += 'OR UCASE(artists.name) LIKE "%' + keywordsUC + '%" ';
+    SQLquery += 'OR UCASE(albums.name) LIKE "%' + keywordsUC + '%" ';
+    SQLquery += ') ';
 
     connection.query(SQLquery, function(err, rows, fields) {
         if (err) {
             console.log(err);
-        }
-        else {
+        } else {
             console.log(rows);
-            var data = {err: ''};
+            var data = { err: '' };
             if (rows.length === 0) {
                 data.err = "No result found for : " + keywords;
-            }
-            else {
+            } else {
                 data.searchResults = rows;
             }
             res.send(data);
@@ -179,7 +177,7 @@ exports.Search = function(req, res){
 };
 
 // Reset list of songs stored in sessions
-exports.ResetGenre = function(req, res){
+exports.ResetGenre = function(req, res) {
     var genreId = req.params.id;
     console.log("Reseting session stored played songs for genre " + genreId);
     connection.query('SELECT * FROM genreAssociation WHERE id = ' + genreId, function(err, rows, fields) {
@@ -192,19 +190,19 @@ exports.ResetGenre = function(req, res){
 };
 
 // Reset sessions
-exports.ResetSessions = function(req, res){
+exports.ResetSessions = function(req, res) {
     req.session.playedSongs = [];
     res.send("Done");
 };
 
 // Reset list of songs stored in sessions
-exports.ResetDatabase = function(req, res){
+exports.ResetDatabase = function(req, res) {
     connection.query("DELETE FROM genreAssociation; DELETE FROM genres; DELETE FROM songs; DELETE FROM artists; DELETE FROM albums; DELETE FROM sessions;", function(err, results) {
         res.send("Bim bim");
     });
 };
 
-exports.ScanMusic = function(req, res){
+exports.ScanMusic = function(req, res) {
 
     // Loading tags processing
     var id3tags = require('../id3tags');
@@ -225,7 +223,8 @@ exports.ScanMusic = function(req, res){
     }
     var files = walk("music");
     // loop through array with all new ids
-    var i = 0, l = files.length;
+    var i = 0,
+        l = files.length;
     console.log("Starting music scan");
     (function iterator() {
         var filename = files[i];
@@ -233,10 +232,9 @@ exports.ScanMusic = function(req, res){
             id3tags.scan(filename);
         }
 
-        if(++i<l) {
+        if (++i < l) {
             setTimeout(iterator, 50);
-        }
-        else {
+        } else {
             console.log("Music scan done");
             res.send("Done");
         }

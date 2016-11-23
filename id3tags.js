@@ -10,14 +10,14 @@ exports.scan = function(path) {
         songMetadata += "Artist : " + metadata.artist[0] + ", ";
         songMetadata += "Album : " + metadata.album + ", ";
         songMetadata += "Genre : " + metadata.genre[0];
-
+        console.log(metadata);
         // TO DO : properly check the title, artist, album and genre before inserting
         if (metadata.genre[0]) {
             if (metadata.artist[0]) {
                 db.insertSong(path, metadata);
             }
             else {
-                //console.log("Artist metadata not found for song : " + metadata.title + ", path : " + path +", album : " + metadata.album +", artist : " + metadata.artist + ", genre: " + metadata.genre);
+                console.log("Artist metadata not found for song : " + metadata.title + ", path : " + path +", album : " + metadata.album +", artist : " + metadata.artist + ", genre: " + metadata.genre);
             }
         }
         
