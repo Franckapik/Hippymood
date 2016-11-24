@@ -1,18 +1,44 @@
+@font-face {
+font-family: 'hollywood';
+src: url('/public/fonts/hollywood/hc-final-webfont.eot');
+src: url('/public/fonts/hollywood/hc-final.otf') format('truetype'),
+     url('/public/fonts/hollywood/hc-final-webfont.woff') format('woff'),
+     url('/public/fonts/hollywood/hc-final-webfont.eot?#iefix') format('embedded-opentype'),
+     url('/public/fonts/hollywood/hc-final-webfont.svg#QuadrantaBold') format('svg');
+font-weight: normal;
+font-style: normal;
+}
+
 #intro { 
     margin: 0 auto;
     max-width: 50em;
-    font-family: "Helvetica", "Arial", sans-serif;
+    font-family: "Times New Roman", Georgia, Serif;
+    font-weight: bold;
+    text-align: center;
+
 }
+
+#intro h1 {
+font-family: 'hollywood';
+font-size: 10em;
+
+
+}
+}
+
 #intro p { 
-    font-size: 1.5rem;
-    line-height: 1.5rem;
+    font-size: 10em;
+    line-height: 10em;
+    
 }
+
 @media screen and (min-resolution: 2dppx) {
     #intro p { 
-        font-size: 3em;
-        line-height: 3rem;
+        font-size: 40em;
+        line-height: 40rem;
     }   
 }
+
 /* General class to display/hide elements with opacity animations */
 .hideOpacity {
     opacity: 0;

@@ -36,16 +36,21 @@ exports.App = function(req, res) {
     SQLquery += 'GROUP BY genres.id ';
     SQLquery += 'ORDER BY nbSongs DESC ';
 
-    connection.query(SQLquery, function(err, rows, fields) {
+//creation and concatenation of a variable SQLQuery.
+
+    connection.query(SQLquery, function(err, rows, fields) { //connection on the mysql database
         if (err)
             console.log(err);
         else {
             var topGenre = [];
             for (var o = 0; o < config.nbTopGenre; o++) {
-                topGenre.push(rows.shift());
+                topGenre.push(rows.shift()); //add genre in the array topgenre.
+
             }
-            var randomRows = topGenre.concat(shuffleArray(rows));
-            res.render('app', { genres: randomRows });
+            var randomRows = topGenre.concat(shuffleArray(rows)); //randomize the array.
+            console.log(randomRows);
+
+            res.render('app', { genres: randomRows }); //renvoie les données genres.
         }
     });
 };

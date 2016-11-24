@@ -183,6 +183,8 @@ button.hide {
 h1 {
     width: 100%;
     text-align: center;
+    font-family: 'hollywood';
+    font-size: 10em;
 }
 #player h2 > span, #player p > span {
     margin: auto;
@@ -294,6 +296,16 @@ h1 {
     src: local('Roboto Medium'),
     local('Roboto Medium'),
     url(/public/fonts/Roboto/Roboto-Medium.ttf) format('truetype');
+}
+@font-face {
+font-family: 'hollywood';
+src: url('/public/fonts/hollywood/hc-final-webfont.eot');
+src: url('/public/fonts/hollywood/hc-final.otf') format('truetype'),
+     url('/public/fonts/hollywood/hc-final-webfont.woff') format('woff'),
+     url('/public/fonts/hollywood/hc-final-webfont.eot?#iefix') format('embedded-opentype'),
+     url('/public/fonts/hollywood/hc-final-webfont.svg#QuadrantaBold') format('svg');
+font-weight: normal;
+font-style: normal;
 }
 /* About */
 img {
