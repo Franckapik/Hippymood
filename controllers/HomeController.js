@@ -1,9 +1,6 @@
 var mysql = require('mysql');
 
-/**
- * Randomize array element order in-place.
- * Using Durstenfeld shuffle algorithm.
- */
+//randomize array element by Durstenfeld shuffle algorithm
 function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -24,9 +21,13 @@ var connection = mysql.createConnection({
     multipleStatements: true
 });
 
+
+//render Index.pug
 exports.Index = function(req, res) {
     res.render('index');
 };
+
+//read database, rendering list of genre, sending by Ajax.
 exports.App = function(req, res) {
     var SQLquery = 'SELECT genres.id, genres.name, COUNT(songs.id) AS nbSongs ';
     
@@ -47,13 +48,15 @@ exports.App = function(req, res) {
                 topGenre.push(rows.shift()); //add genre in the array topgenre.
 
             }
-            var randomRows = topGenre.concat(shuffleArray(rows)); //randomize the array.
+            var randomRows = topGenre.concat(shuffleArray(rows)); //randomize the array (shuffleArray function)
             console.log(randomRows);
 
             res.render('app', { genres: randomRows }); //renvoie les données genres.
         }
     });
 };
+
+//rendering admin.pug
 exports.Admin = function(req, res) {
     res.render('admin');
 };
@@ -148,7 +151,7 @@ exports.Genre = function(req, res) {
     });
 };
 
-// Function to get song infos by submitting a genre
+// Function to get song infos by submitting a genre (search function)
 exports.Search = function(req, res) {
     var keywords = req.params.keywords;
     var keywordsUC = keywords.toUpperCase();
@@ -176,7 +179,7 @@ exports.Search = function(req, res) {
             } else {
                 data.searchResults = rows;
             }
-            res.send(data);
+            res.send(data); //sending results of the search req.params.keywords
         }
     });
 };
@@ -215,7 +218,7 @@ exports.ScanMusic = function(req, res) {
     var fs = require('fs');
     var path = require('path');
 
-    var walk = function(dir) {
+    var walk = function(dir) { //creation of the reading file function (why the name is walk??)
         var results = []
         var list = fs.readdirSync(dir)
         list.forEach(function(file) {
@@ -226,22 +229,24 @@ exports.ScanMusic = function(req, res) {
         })
         return results
     }
-    var files = walk("music");
+
+    var files = walk("music"); //reading the music folder
+
     // loop through array with all new ids
     var i = 0,
         l = files.length;
-    console.log("Starting music scan");
+    console.log("The Groovy scan is on! ");
     (function iterator() {
         var filename = files[i];
         if (filename.slice(-3) == "mp3") {
-            id3tags.scan(filename);
+            id3tags.scan(filename); //id3tags scan function (required).
         }
 
         if (++i < l) {
             setTimeout(iterator, 50);
         } else {
-            console.log("Music scan done");
-            res.send("Done");
+            console.log("Let's dance now ! (Scan done)");
+            res.send("Done"); //Could be usefull to render a file list on the browser ?
         }
     })();
 };

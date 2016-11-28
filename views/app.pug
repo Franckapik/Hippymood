@@ -1,8 +1,10 @@
-div#title.mdl-grid(style="display:none")
+div#title.mdl-grid(style="display:none") 
     h1 Hippy Mood 
 include ./includes/about.pug
-div#app.mdl-grid(style="display:none")
-    div.mdl-tabs.mdl-js-tabs.mdl-js-ripple-effect
+
+div#app.mdl-grid(style="display:none") 
+
+    div.mdl-tabs.mdl-js-tabs.mdl-js-ripple-effect 
         div.mdl-tabs__tab-bar
             a.mdl-tabs__tab.is-active(href="#player-panel") Lecteur
             a.mdl-tabs__tab(href="#search-panel") Recherche
@@ -12,10 +14,10 @@ div#app.mdl-grid(style="display:none")
             include ./includes/search.pug
 div.mdl-grid
     div.mdl-grid.genreList
-        each val in genres
+        each val in genres 
             button.mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.genreItem(id="genreBtn" + val.id, class="genreItem", data-genre-id=val.id, data-genre-name=val.name)
                 span= val.name
-div#demo-snackbar-example.mdl-js-snackbar.mdl-snackbar
+div#demo-snackbar-example.mdl-js-snackbar.mdl-snackbar 
     div.mdl-snackbar__text
     button.mdl-snackbar__action(type="button")
 audio#playerHTML5(autoplay)

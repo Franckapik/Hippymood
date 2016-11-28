@@ -1,15 +1,16 @@
 var robotoLoaded = 0
     genericFunctionsLoaded = 0
     appHTMLLoaded = 0
-    appHTML = "";
+    appHTML = ""; //at the beginning, appHTML is empty (before display function)
     ;
 function initGenrePlayer() {
     function display() {
         // Load app HTML
-        var appData = document.getElementById("appData");
-        appData.innerHTML = appHTML;
+        var appData = document.getElementById("appData"); //here is the div of the app, loading with data.
+        appData.innerHTML = appHTML; //fill the div balise with the data.
         // Getting MDL working with the new elements
         componentHandler.upgradeDom();
+
 
         loadScript(
             "/public/js/ui.js", 
@@ -20,7 +21,7 @@ function initGenrePlayer() {
 
         /* Loading dialog polyfill */
         loadScript(
-            "/public/js/dialog-polyfill/dialog-polyfill.js",
+            "/public/js/dialog-polyfill/dialog-polyfill.js", //polyfill for browsers which do not support <dialog>.
             function () {
                 var button = document.getElementById('show-dialog');
                 var dialog = document.getElementsByClassName('mdl-dialog')[0];
@@ -85,6 +86,10 @@ loadScript(
         );
     }
 );
+
+
+
+
 /* Function to display player and hide intro text */
 var playerInit = function (event) {
     var intro = document.getElementById("intro");
@@ -95,8 +100,9 @@ var playerInit = function (event) {
     title.style.display = "";
 
     window.removeEventListener('click',playerInit, false );
+    loadScript("/public/js/audiovue.js", function(){});
 };
-function retrieveAppHTML() {
+function retrieveAppHTML() { //get the app 
     getAjax("/app", function(data){ 
         appHTML = data;
         appHTMLLoaded = 1;

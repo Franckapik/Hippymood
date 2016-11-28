@@ -1,0 +1,13 @@
+# Example configuration file, to be renamed as config.js and with the good values
+var config = {};
+
+config.db = {};
+
+config.db.host = "dbHost";
+config.db.user = "dbUser";
+config.db.password = "dbPassword";
+config.db.database = "dbName";
+
+config.nbTopGenre = 5;
+
+module.exports = config;

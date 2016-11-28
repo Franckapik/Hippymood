@@ -1,11 +1,11 @@
-//chargement des modules
+//module requiring.
 
 var express = require('express');
 var app = express();
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 
-//variables mysql
+//variables mysql on config.js only for the session creation
 var config = require('./config');
 var options = {
     host: config.db.host,
@@ -26,10 +26,10 @@ var options = {
     }
 };
 
-//nouvelle session
+//new session.
 var sessionStore = new MySQLStore(options);
 
-app.use(session({
+app.use(session({ //creation of a new session
     key: 'session_cookie_name',
     secret: 'session_cookie_secret',
     store: sessionStore,
@@ -38,10 +38,10 @@ app.use(session({
     })
 );
 
-app.set('port', process.env.PORT || 8080);
-app.set('view engine', 'pug');
+app.set('port', process.env.PORT || 8080); //port
+app.set('view engine', 'pug'); //template
 
-app.use('/music', express.static('music'));
+app.use('/music', express.static('music')); //give acces to the static folders.
 app.use('/public', express.static('public'));
 
 
@@ -49,5 +49,5 @@ app.use('/public', express.static('public'));
 require('./router')(app);
 
 app.listen(app.get('port'), function () {
-      console.log('Get it Spicy Dude !' + app.get('port') + '!');
+      console.log('Get it Spicy Dude !' + 'on' + app.get('port') + '!');
 });
