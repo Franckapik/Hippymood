@@ -1,6 +1,6 @@
 var fs = require('fs');
 var mm = require('musicmetadata');
-var db = require('./database');
+var db = require('./database(knex)');
 
 exports.scan = function(path) {
     // create a new parser from a node ReadStream
@@ -10,7 +10,7 @@ exports.scan = function(path) {
         songMetadata += "Artist : " + metadata.artist[0] + ", ";
         songMetadata += "Album : " + metadata.album + ", ";
         songMetadata += "Genre : " + metadata.genre[0];
-        console.log(metadata); //What about songMetadata ? What is it for ?
+        /**console.log('ici :' +  songMetadata); //What about songMetadata ? What is it for ?**/
 
 
 
