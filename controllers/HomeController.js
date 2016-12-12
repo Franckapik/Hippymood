@@ -1,4 +1,16 @@
 var mysql = require('mysql');
+var config = require('../config');
+var knex = require('knex')({
+    client: 'mysql',
+    connection: {
+        host: config.db.host,
+        user: config.db.user,
+        password: config.db.password,
+        database: config.db.database
+
+    }
+
+});
 
 //randomize array element by Durstenfeld shuffle algorithm
 function shuffleArray(array) {
@@ -29,20 +41,15 @@ exports.Index = function(req, res) {
 
 //read database, rendering list of genre, sending by Ajax.
 exports.App = function(req, res) {
-    var SQLquery = 'SELECT genres.id, genres.name, COUNT(songs.id) AS nbSongs ';
-    
-    SQLquery += 'FROM songs ';
-    SQLquery += 'JOIN genreAssociation ON songs.id = genreAssociation.id_songs ';
-    SQLquery += 'JOIN genres ON genreAssociation.id = genres.id ';
-    SQLquery += 'GROUP BY genres.id ';
-    SQLquery += 'ORDER BY nbSongs DESC ';
 
-//creation and concatenation of a variable SQLQuery.
-
-    connection.query(SQLquery, function(err, rows, fields) { //connection on the mysql database
-        if (err)
-            console.log(err);
-        else {
+    knex.select('genres.id', 'genres.name')
+        .count('songs.id as nbSongs')
+        .from('songs')
+        .join('genreAssociation', 'songs.id', '=', 'genreAssociation.id_songs')
+        .join('genres', 'genreAssociation.id', '=', 'genres.id')
+        .groupBy('genres.id')
+        .orderBy('nbSongs', 'desc')
+        .then(function(rows) {
             var topGenre = [];
             for (var o = 0; o < config.nbTopGenre; o++) {
                 topGenre.push(rows.shift()); //add genre in the array topgenre.
@@ -51,11 +58,46 @@ exports.App = function(req, res) {
             var randomRows = topGenre.concat(shuffleArray(rows)); //randomize the array (shuffleArray function)
             console.log(randomRows);
 
-            res.render('app', { genres: randomRows }); //renvoie les données genres.
+            res.render('app', { genres: randomRows });
+
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+
+};
+/**
+
+
+
+
+
+
+ var SQLquery = 'SELECT genres.id, genres.name, COUNT(songs.id) AS nbSongs ';
+        SQLquery += 'FROM songs ';
+        SQLquery += 'JOIN genreAssociation ON songs.id = genreAssociation.id_songs ';
+        SQLquery += 'JOIN genres ON genreAssociation.id = genres.id ';
+        SQLquery += 'GROUP BY genres.id ';
+        SQLquery += 'ORDER BY nbSongs DESC ';
+
+    connection.query(SQLquery, function(err, rows, fields) {
+        if (err)
+            console.log(err);
+        else {
+            
+            var topGenre = [];
+            for (var o = 0; o < config.nbTopGenre; o++) {
+                topGenre.push(rows.shift());
+            }
+            var randomRows = topGenre.concat(shuffleArray(rows));
+            console.log(randomRows);
+            res.render('app', {genres: randomRows});
         }
     });
 };
+//renvoie les données genres.
 
+**/
 //rendering admin.pug
 exports.Admin = function(req, res) {
     res.render('admin');
@@ -69,94 +111,105 @@ exports.Genre = function(req, res) {
     res.header("Expires", 0);
 
     var genre = req.params.id;
+    console.log('genre = ' + genre);
 
-    var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album ';
-    SQLquery += 'FROM songs, genreAssociation, artists, albums ';
-    SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
-    SQLquery += 'AND genreAssociation.id = "' + req.params.id + '"';
-    SQLquery += 'AND songs.id_artists = artists.id ';
-    SQLquery += 'AND songs.id_albums = albums.id ';
+    var query = knex.select('songs.id', 'songs.name as song', 'songs.path') //faire multiples join a la place des where
+        .from('songs')
+        .join('genreAssociation', 'songs.id', '=', 'genreAssociation.id_songs')
 
-    // Select song from not played songs
+    .join('artists', 'songs.id_artists', '=', 'artists.id')
+        .join('albums', 'songs.id_albums', '=', 'albums.id')
+        .where('genreAssociation.id', req.params.id);
+
     if (req.session.playedSongs && req.session.playedSongs.length != 0 && req.session.playedSongs != []) {
-        SQLquery += 'AND songs.id NOT IN (';
-        req.session.playedSongs.forEach(function(entry, index) {
-            if (index != req.session.playedSongs.length - 1)
-                SQLquery += '"' + entry + '", ';
-            else
-                SQLquery += '"' + entry + '") ';
-
-        });
+        query.whereNotIn('songs.id', req.session.playedSongs);
     }
 
-    connection.query(SQLquery, function(err, rows, fields) {
-        if (err) throw err;
+    query.then(function(rows) {
 
-        if (rows.length > 0) {
-            var randomIndex1 = Math.floor(Math.random() * rows.length);
 
-            var randomSongs = [];
-            randomSongs.push(rows[randomIndex1]);
+            if (rows.length > 0) {
+                var randomIndex1 = Math.floor(Math.random() * rows.length);
 
-            // Selecting next song as well if possible
-            if (rows.length > 1) {
-                var randomIndex2 = randomIndex1;
-                do {
-                    randomIndex2 = Math.floor(Math.random() * rows.length);
-                } while (randomIndex1 == randomIndex2);
-                randomSongs.push(rows[randomIndex2]);
+                var randomSongs = [];
+                randomSongs.push(rows[randomIndex1]);
+
+                // Selecting next song as well if possible
+                if (rows.length > 1) {
+                    var randomIndex2 = randomIndex1;
+                    do {
+                        randomIndex2 = Math.floor(Math.random() * rows.length);
+                    } while (randomIndex1 == randomIndex2);
+                    randomSongs.push(rows[randomIndex2]);
+                }
+
+                // -1 to count the one being played
+                var infos = { nbSongLeft: rows.length - 1 };
+
+
+
+                // Saving song played id
+                if (req.session.playedSongs == undefined)
+                    req.session.playedSongs = [randomSongs[0]['id']];
+                else
+                    req.session.playedSongs.push(randomSongs[0]['id']);
+
+                var response = {
+                    songs: randomSongs,
+                    infos: infos
+                };
+
+
+
+                res.send(response);
+            } else {
+                var error = { "allSongGenrePlayed": 1 };
+                res.send({ error });
             }
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
 
-            // -1 to count the one being played
-            var infos = { nbSongLeft: rows.length - 1 };
-
-            var randomIndex1 = Math.floor(Math.random() * rows.length);
-
-            var randomSongs = [];
-            randomSongs.push(rows[randomIndex1]);
-
-            // Selecting next song as well if possible
-            if (rows.length > 1) {
-                var randomIndex2 = randomIndex1;
-                do {
-                    randomIndex2 = Math.floor(Math.random() * rows.length);
-                } while (randomIndex1 == randomIndex2);
-                randomSongs.push(rows[randomIndex2]);
-            }
-
-            // -1 to count the one being played
-            var infos = { nbSongLeft: rows.length - 1 };
-
-            // Saving song played id
-            if (req.session.playedSongs == undefined)
-                req.session.playedSongs = [randomSongs[0]['id']];
-            else
-                req.session.playedSongs.push(randomSongs[0]['id']);
-
-            var response = {
-                songs: randomSongs,
-                infos: infos
-            };
-
-            var response = {
-                songs: randomSongs,
-                infos: infos
-            };
-
-            res.send(response);
-        } else {
-            var error = { "allSongGenrePlayed": 1 };
-            res.send({ error });
-        }
-    });
 };
 
 // Function to get song infos by submitting a genre (search function)
 exports.Search = function(req, res) {
     var keywords = req.params.keywords;
-    var keywordsUC = keywords.toUpperCase();
+    var keywordsUC = '%' + keywords.toUpperCase() + '%';
+    console.log(keywordsUC);
 
-    var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album, genres.name AS genre ';
+
+    var query = knex.select('songs.id', 'songs.name as song', 'songs.path')
+        .from('songs')
+        .join('genreAssociation', 'songs.id', '=', 'genreAssociation.id_songs')
+        .join('artists', 'songs.id_artists', '=', 'artists.id')
+        .join('albums', 'songs.id_albums', '=', 'albums.id')
+        .join('genres', 'genres.id', '=', 'genreAssociation.id')
+
+
+    .where('songs.name', 'like', keywordsUC)
+        .orWhere('artists.name', 'like', keywordsUC)
+        .orWhere('albums.name', 'like', keywordsUC);
+
+
+    console.log(query.toSQL());
+    query.then(function(rows) {
+        console.log(rows);
+        console.log(query);
+        var data = {};
+        if (rows.length > 0)
+            data.searchResults = rows;
+        res.send(data); //sending results of the search req.params.keywords
+
+    })
+
+    .catch(function(error) {
+        console.error(error);
+    });
+
+
+    /*var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album, genres.name AS genre ';
     SQLquery += 'FROM songs, genreAssociation, genres, artists, albums ';
     SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
     SQLquery += 'AND genres.id = genreAssociation.id ';
@@ -181,20 +234,37 @@ exports.Search = function(req, res) {
             }
             res.send(data); //sending results of the search req.params.keywords
         }
-    });
+    });*/
 };
 
 // Reset list of songs stored in sessions
 exports.ResetGenre = function(req, res) {
     var genreId = req.params.id;
     console.log("Reseting session stored played songs for genre " + genreId);
-    connection.query('SELECT * FROM genreAssociation WHERE id = ' + genreId, function(err, rows, fields) {
+
+    knex.select('*')
+    .from('genreAssociation')
+    .where('id', genreId)
+    .then(function(rows) {
+        rows.forEach(function(entry, index) {
+            var i = req.session.playedSongs.indexOf(entry.id_songs);
+            req.session.playedSongs.splice(i, 1);
+        });
+        res.send("Le Genre " + genreId + ' a été supprimé!');
+
+    })
+    .catch(function(error) {
+        console.error(error);
+    });
+
+
+    /*connection.query('SELECT * FROM genreAssociation WHERE id = ' + genreId, function(err, rows, fields) {
         rows.forEach(function(entry, index) {
             var i = req.session.playedSongs.indexOf(entry.id_songs);
             req.session.playedSongs.splice(i, 1);
         });
         res.send("Genre ID : " + genreId);
-    });
+    });*/
 };
 
 // Reset sessions
@@ -205,10 +275,30 @@ exports.ResetSessions = function(req, res) {
 
 // Reset list of songs stored in sessions
 exports.ResetDatabase = function(req, res) {
-    connection.query("DELETE FROM genreAssociation; DELETE FROM genres; DELETE FROM songs; DELETE FROM artists; DELETE FROM albums; DELETE FROM sessions;", function(err, results) {
+
+    knex.schema.dropTable('sessions')
+   /* knex('genreAssociation').del();
+    knex('genres').del();
+    knex('songs').del();
+    knex('artists').del();
+    knex('albums').del();/*
+    knex('sessions').del() //problem a deletion database. fk
+    
+
+    */.then(
+
+            res.send("Bim bim")
+
+        )
+        .catch(function(error) {
+            console.error(error);
+        });
+
+    /*connection.query("DELETE FROM genreAssociation; DELETE FROM genres; DELETE FROM songs; DELETE FROM artists; DELETE FROM albums; DELETE FROM sessions;", function(err, results) {
         res.send("Bim bim");
-    });
+    });*/
 };
+
 
 exports.ScanMusic = function(req, res) {
 

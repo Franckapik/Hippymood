@@ -64,3 +64,5 @@ ALTER TABLE songs ADD CONSTRAINT FK_songs_id_albums FOREIGN KEY (id_albums) REFE
 ALTER TABLE songs ADD CONSTRAINT FK_songs_id_artists FOREIGN KEY (id_artists) REFERENCES artists(id);
 ALTER TABLE genreAssociation ADD CONSTRAINT FK_genreAssociation_id FOREIGN KEY (id) REFERENCES genres(id);
 ALTER TABLE genreAssociation ADD CONSTRAINT FK_genreAssociation_id_songs FOREIGN KEY (id_songs) REFERENCES songs(id);
+
+/*ALTER TABLE `songs` ADD CONSTRAINT `songs_id_albums_foreign`FOREIGN KEY (`id_albums`) REFERENCES `albums` (`id`)
