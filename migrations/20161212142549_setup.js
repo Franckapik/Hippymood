@@ -25,8 +25,9 @@ exports.up = function(knex, Promise) {
         }),
 
         knex.schema.createTable('genreAssociation', function(table) {
-            table.increments();
-            table.integer('id_songs').unsigned();
+            table.integer('id').references('genres.id');
+            table.integer('id_songs').references('songs.id').unsigned();
+            table.primary(['id', 'id_songs']);
 
         }),
 
@@ -42,16 +43,16 @@ exports.up = function(knex, Promise) {
 
             });
         })
-        .then(function() {
+        /*.then(function() {
 
 
             return knex.schema.table('genreAssociation', function(table) {
-            	table.primary(['id', 'id_songs']);
+
                 table.foreign('id').references('genres.id');
                 table.foreign('id_songs').references('songs.id');
                 
             });
-        })
+        })*/
         .catch(function(error) {
             console.error(error);
         });
