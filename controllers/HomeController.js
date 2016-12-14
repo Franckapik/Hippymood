@@ -8,8 +8,10 @@ var knex = require('knex')({
         password: config.db.password,
         database: config.db.database
 
-    }
+    },
 
+    directory : '../migration',
+        
 });
 
 //randomize array element by Durstenfeld shuffle algorithm
@@ -243,19 +245,19 @@ exports.ResetGenre = function(req, res) {
     console.log("Reseting session stored played songs for genre " + genreId);
 
     knex.select('*')
-    .from('genreAssociation')
-    .where('id', genreId)
-    .then(function(rows) {
-        rows.forEach(function(entry, index) {
-            var i = req.session.playedSongs.indexOf(entry.id_songs);
-            req.session.playedSongs.splice(i, 1);
-        });
-        res.send("Le Genre " + genreId + ' a été supprimé!');
+        .from('genreAssociation')
+        .where('id', genreId)
+        .then(function(rows) {
+            rows.forEach(function(entry, index) {
+                var i = req.session.playedSongs.indexOf(entry.id_songs);
+                req.session.playedSongs.splice(i, 1);
+            });
+            res.send("Le Genre " + genreId + ' a été supprimé!');
 
-    })
-    .catch(function(error) {
-        console.error(error);
-    });
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
 
 
     /*connection.query('SELECT * FROM genreAssociation WHERE id = ' + genreId, function(err, rows, fields) {
@@ -276,18 +278,20 @@ exports.ResetSessions = function(req, res) {
 // Reset list of songs stored in sessions
 exports.ResetDatabase = function(req, res) {
 
-    knex.schema.dropTable('sessions')
-   /* knex('genreAssociation').del();
-    knex('genres').del();
-    knex('songs').del();
-    knex('artists').del();
-    knex('albums').del();/*
-    knex('sessions').del() //problem a deletion database. fk
-    
+    knex.migrate.latest()
+        /* knex('genreAssociation').del();
+         knex('genres').del();
+         knex('songs').del();
+         knex('artists').del();
+         knex('albums').del();/*
+         knex('sessions').del() //problem a deletion database. fk
+         
 
-    */.then(
+         */
+        .then(
 
-            res.send("Bim bim")
+            res.send("Bim bim") ,
+            console.log('migration latest')
 
         )
         .catch(function(error) {

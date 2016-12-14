@@ -64,17 +64,17 @@ function checkArtist(path, metadata) {
     knex('artists')
         .where('name', artist)
         .then(function(rows) { 
-console.log('a');
+
 
             var nbMatch = rows.length;// ce code ne semble pas etre exécuté !
 
             if (nbMatch == 0) {
-console.log('b');
+
 
 
                 if (newlyRegisteredArtist.indexOf(artist) == -1) {
                     newlyRegisteredArtist.push(artist);
-console.log('c');
+
                     var insertStatement = { id: '', name: artist };
                     knex('artists').insert(insertStatement)
                         .then(function(rows) {
@@ -95,7 +95,7 @@ console.log('c');
             }
         })
         .catch(function(error) { console.error(error); });
-console.log('e');
+
 }
 
 var newlyRegisteredAlbum = [];
@@ -156,15 +156,15 @@ function checkSong(path, metadata) {
                 knex('songs')
                     .insert(song)
                     .then(function(rows) {
-                        console.log("Ahhhhhhhhhhhh");
+                       
 
                         metadata['song_id'] = rows['insertId']; //n'existe pas!
                         genreAssociation(metadata);
-                        console.log('oieoie' + metadata['song_id']);
+                        
                     })
                     .catch(function(error) { console.error(error); });
             } else {
-                console.log("ooohhhhhhhhhhhh");
+                
                 genreAssociation(metadata);
             }
         })
@@ -176,9 +176,9 @@ function genreAssociation(metadata) {
     var genre_id = metadata.genre_id;
     
     var song_id = metadata.song_id;
-    console.log(song_id);
+    
     var genreRelation = { id: genre_id, id_songs: song_id };
-    console.log('canard :' + genreRelation);
+    
     knex('genreAssociation')
         .insert(genreRelation)
         .catch(function(error) { console.error(error); });

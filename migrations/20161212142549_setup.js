@@ -25,8 +25,8 @@ exports.up = function(knex, Promise) {
         }),
 
         knex.schema.createTable('genreAssociation', function(table) {
-            table.integer('id').references('genres.id');
-            table.integer('id_songs').references('songs.id').unsigned();
+            table.integer('id').unsigned();
+            table.integer('id_songs').unsigned();
             table.primary(['id', 'id_songs']);
 
         }),
@@ -38,21 +38,21 @@ exports.up = function(knex, Promise) {
 
             return knex.schema.table('songs', function(table) {
 
-                table.foreign('id_albums').references('albums.id');
-                table.foreign('id_artists').references('artists.id');
+                table.foreign('id_albums').references('albums.id').onUpdate('CASCADE').onDelete('CASCADE');
+                table.foreign('id_artists').references('artists.id').onUpdate('CASCADE').onDelete('CASCADE');
 
             });
         })
-        /*.then(function() {
+        .then(function() {
 
 
             return knex.schema.table('genreAssociation', function(table) {
 
-                table.foreign('id').references('genres.id');
-                table.foreign('id_songs').references('songs.id');
+                table.foreign('id').references('genres.id').onUpdate('CASCADE').onDelete('CASCADE');
+                table.foreign('id_songs').references('songs.id').onUpdate('CASCADE').onDelete('CASCADE');
                 
             });
-        })*/
+        })
         .catch(function(error) {
             console.error(error);
         });
@@ -60,10 +60,15 @@ exports.up = function(knex, Promise) {
 
 exports.down = function(knex, Promise) {
     return Promise.all([
-        knex.schema.dropTable('albums'),
-        knex.schema.dropTable('artists'),
-        knex.schema.dropTable('genres'),
-        knex.schema.dropTable('songs')
+    	knex.schema.dropTableIfExists('genreAssociation'),
+    	knex.schema.dropTableIfExists('genres'),
+    	knex.schema.dropTableIfExists('songs'),
+    	knex.schema.dropTableIfExists('artists'),
+        knex.schema.dropTableIfExists('albums'),
+        knex.schema.dropTableIfExists('sessions')
+        
+        
+        
         /*knex.schema.dropTable('sessions')*/
     ]);
 };
