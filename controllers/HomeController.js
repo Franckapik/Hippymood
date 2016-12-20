@@ -270,7 +270,14 @@ exports.ResetSessions = function(req, res) {
     req.session.playedSongs = [];
     res.send("Done");
 };
-
+/**
+[18:27] <shoky_> Franckapik: that should work but those vars are bad. one way to go:   var promises = [knex(..).del(), knex(..).del(), ...];  Promise.all(promises).then(...);
+[18:27] == jekrb [~jekrb@198-0-154-86-static.hfc.comcastbusiness.net] has joined #Node.js
+[18:28] <shoky_> Franckapik: or..   var promises = [];   promises.push(knex(..).del()); promises.push(...);  Promise.all(promises)...   or similar ways. just make an array
+[18:28] == bdunavant [~bdunavant@static-108-48-124-82.washdc.fios.verizon.net] has quit [Quit: Leaving...]
+[18:28] <shoky_> no need for separate var for each promise
+[18:28] <deecee> i hope I can do this by "fixing the MIME type" of my files, whatever that implies
+[18:28] <shoky_> with nonsensical names**/
 // Reset list of songs stored in sessions
 exports.ResetDatabase = function(req, res) {
 
