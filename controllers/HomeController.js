@@ -7,11 +7,7 @@ var knex = require('knex')({
         user: config.db.user,
         password: config.db.password,
         database: config.db.database
-
-    },
-
-    directory : '../migration',
-        
+      
 });
 
 //randomize array element by Durstenfeld shuffle algorithm
