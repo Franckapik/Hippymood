@@ -278,15 +278,15 @@ exports.ResetSessions = function(req, res) {
 // Reset list of songs stored in sessions
 exports.ResetDatabase = function(req, res) {
 
-         knex('genreAssociation').del();
-         knex('genres').del();
-         knex('songs').del();
-         knex('artists').del();
-         knex('albums').del();
-         knex('sessions').del() //problem a deletion database. fk
+    var a = knex('genreAssociation').del();
+    var b = knex('genres').del();
+    var c = knex('songs').del();
+    var d = knex('artists').del();
+    var e = knex('albums').del();
+    var f = knex('sessions').del(); 
          
-
-         
+	Promise.all([a,b,c,d,e,f])
+        
         .then(
 
             res.send("Bim bim") ,

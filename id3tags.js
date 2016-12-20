@@ -1,6 +1,6 @@
 var fs = require('fs');
 var mm = require('musicmetadata');
-var db = require('./database(knex)');
+var db = require('./database');
 
 exports.scan = function(path) {
     // create a new parser from a node ReadStream
