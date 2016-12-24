@@ -53,9 +53,9 @@ function loadScript(url, callback = null) {
     document.body.appendChild(script);
 }
 
-loadStyleSheet( "/public/css/mdl/material.min.css", function( success, link ) {
+loadStyleSheet( "/node_modules/material-design-lite/material.min.css", function( success, link ) {
     if ( success ) {
-        loadScript("/public/js/mdl/material.min.js", CallBackForAfterFileLoaded);
+        loadScript("/node_modules/material-design-lite/material.min.js", CallBackForAfterFileLoaded);
     }
 });
 function CallBackForAfterFileLoaded (e) {

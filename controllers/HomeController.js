@@ -7,7 +7,8 @@ var knex = require('knex')({
         user: config.db.user,
         password: config.db.password,
         database: config.db.database
-      
+
+    }
 });
 
 //randomize array element by Durstenfeld shuffle algorithm
@@ -64,38 +65,7 @@ exports.App = function(req, res) {
         });
 
 };
-/**
 
-
-
-
-
-
- var SQLquery = 'SELECT genres.id, genres.name, COUNT(songs.id) AS nbSongs ';
-        SQLquery += 'FROM songs ';
-        SQLquery += 'JOIN genreAssociation ON songs.id = genreAssociation.id_songs ';
-        SQLquery += 'JOIN genres ON genreAssociation.id = genres.id ';
-        SQLquery += 'GROUP BY genres.id ';
-        SQLquery += 'ORDER BY nbSongs DESC ';
-
-    connection.query(SQLquery, function(err, rows, fields) {
-        if (err)
-            console.log(err);
-        else {
-            
-            var topGenre = [];
-            for (var o = 0; o < config.nbTopGenre; o++) {
-                topGenre.push(rows.shift());
-            }
-            var randomRows = topGenre.concat(shuffleArray(rows));
-            console.log(randomRows);
-            res.render('app', {genres: randomRows});
-        }
-    });
-};
-//renvoie les données genres.
-
-**/
 //rendering admin.pug
 exports.Admin = function(req, res) {
     res.render('admin');
@@ -206,33 +176,6 @@ exports.Search = function(req, res) {
         console.error(error);
     });
 
-
-    /*var SQLquery = 'SELECT songs.id, songs.name AS song, artists.name AS artist, songs.path, albums.name AS album, genres.name AS genre ';
-    SQLquery += 'FROM songs, genreAssociation, genres, artists, albums ';
-    SQLquery += 'WHERE songs.id = genreAssociation.id_songs ';
-    SQLquery += 'AND genres.id = genreAssociation.id ';
-    SQLquery += 'AND songs.id_artists = artists.id ';
-    SQLquery += 'AND songs.id_albums = albums.id ';
-    SQLquery += 'AND ( ';
-    SQLquery += 'UCASE(songs.name) LIKE "%' + keywordsUC + '%" ';
-    SQLquery += 'OR UCASE(artists.name) LIKE "%' + keywordsUC + '%" ';
-    SQLquery += 'OR UCASE(albums.name) LIKE "%' + keywordsUC + '%" ';
-    SQLquery += ') ';
-
-    connection.query(SQLquery, function(err, rows, fields) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(rows);
-            var data = { err: '' };
-            if (rows.length === 0) {
-                data.err = "No result found for : " + keywords;
-            } else {
-                data.searchResults = rows;
-            }
-            res.send(data); //sending results of the search req.params.keywords
-        }
-    });*/
 };
 
 // Reset list of songs stored in sessions
@@ -255,14 +198,6 @@ exports.ResetGenre = function(req, res) {
             console.error(error);
         });
 
-
-    /*connection.query('SELECT * FROM genreAssociation WHERE id = ' + genreId, function(err, rows, fields) {
-        rows.forEach(function(entry, index) {
-            var i = req.session.playedSongs.indexOf(entry.id_songs);
-            req.session.playedSongs.splice(i, 1);
-        });
-        res.send("Genre ID : " + genreId);
-    });*/
 };
 
 // Reset sessions
@@ -270,29 +205,25 @@ exports.ResetSessions = function(req, res) {
     req.session.playedSongs = [];
     res.send("Done");
 };
-/**
-[18:27] <shoky_> Franckapik: that should work but those vars are bad. one way to go:   var promises = [knex(..).del(), knex(..).del(), ...];  Promise.all(promises).then(...);
-[18:27] == jekrb [~jekrb@198-0-154-86-static.hfc.comcastbusiness.net] has joined #Node.js
-[18:28] <shoky_> Franckapik: or..   var promises = [];   promises.push(knex(..).del()); promises.push(...);  Promise.all(promises)...   or similar ways. just make an array
-[18:28] == bdunavant [~bdunavant@static-108-48-124-82.washdc.fios.verizon.net] has quit [Quit: Leaving...]
-[18:28] <shoky_> no need for separate var for each promise
-[18:28] <deecee> i hope I can do this by "fixing the MIME type" of my files, whatever that implies
-[18:28] <shoky_> with nonsensical names**/
-// Reset list of songs stored in sessions
+
 exports.ResetDatabase = function(req, res) {
 
-    var a = knex('genreAssociation').del();
-    var b = knex('genres').del();
-    var c = knex('songs').del();
-    var d = knex('artists').del();
-    var e = knex('albums').del();
-    var f = knex('sessions').del(); 
-         
-	Promise.all([a,b,c,d,e,f])
-        
-        .then(
+    var promises = [
 
-            res.send("Bim bim") ,
+        knex('genreAssociation').del(),
+        knex('genres').del(),
+        knex('songs').del(),
+        knex('artists').del(),
+        knex('albums').del(),
+        knex('sessions').del(),
+
+    ];
+
+    Promise.all(promises)
+
+    .then(
+
+            res.send("Bim bim"),
             console.log('Database deleted')
 
         )
@@ -300,9 +231,7 @@ exports.ResetDatabase = function(req, res) {
             console.error(error);
         });
 
-    /*connection.query("DELETE FROM genreAssociation; DELETE FROM genres; DELETE FROM songs; DELETE FROM artists; DELETE FROM albums; DELETE FROM sessions;", function(err, results) {
-        res.send("Bim bim");
-    });*/
+
 };
 
 
@@ -315,16 +244,16 @@ exports.ScanMusic = function(req, res) {
     var path = require('path');
 
     var walk = function(dir) { //creation of the reading file function (why the name is walk??)
-        var results = []
-        var list = fs.readdirSync(dir)
+        var results = [];
+        var list = fs.readdirSync(dir);
         list.forEach(function(file) {
-            file = dir + '/' + file
-            var stat = fs.statSync(file)
-            if (stat && stat.isDirectory()) results = results.concat(walk(file))
-            else results.push(file)
-        })
-        return results
-    }
+            file = dir + '/' + file;
+            var stat = fs.statSync(file);
+            if (stat && stat.isDirectory()) results = results.concat(walk(file));
+            else results.push(file);
+        });
+        return results;
+    };
 
     var files = walk("music"); //reading the music folder
 
