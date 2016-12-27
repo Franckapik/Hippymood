@@ -43,7 +43,7 @@ app.set('view engine', 'pug'); //template
 
 app.use('/music', express.static('music')); //give acces to the static folders.
 app.use('/public', express.static('public'));
-
+app.use('/node_modules/material-design-lite', express.static('node_modules'));
 
 // send app to router
 require('./router')(app);
